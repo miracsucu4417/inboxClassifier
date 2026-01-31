@@ -1,7 +1,7 @@
 import crypto from "crypto";
 
 const ALGORITHM = "aes-256-gcm";
-const IV_LENGTH = 16; // bytes
+const IV_LENGTH = 16;
 
 const key = Buffer.from(process.env.GOOGLE_TOKEN_ENCRYPTION_KEY, "hex");
 

@@ -16,19 +16,21 @@ export const getGoogleUserInfo = async (code) => {
 
         const decoded = jwt.decode(tokens.id_token);
 
-        const email = decoded.email;
-        const fullName = decoded.name;
-        const pictureURL = decoded.picture;
+        if (!decoded?.email) {
+            const error = new Error("Email not provided by Google");
+            error.statusCode = 400;
+            throw error;
+        }
 
         const userInfo = {
-            email,
-            fullName,
-            pictureURL,
+            email: decoded.email,
+            fullName: decoded.name ?? null,
+            pictureURL: decoded.picture ?? null,
         };
 
         const refreshToken = tokens?.refresh_token;
 
-        return { userInfo: userInfo, refreshToken: refreshToken };
+        return { userInfo, refreshToken };
     } catch (error) {
         throw error;
     }
@@ -112,5 +114,3 @@ export const getOAuthRefreshToken = async (provider, user_id) => {
 
     return refresh_token;
 };
-
-

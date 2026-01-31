@@ -1,8 +1,5 @@
 import jwt from "jsonwebtoken";
-import { config } from "dotenv";
 import pool from "../config/db.js";
-
-config();
 
 export const checkJWT = (req, res, next) => {
     const authHeader = req.headers.authorization;
