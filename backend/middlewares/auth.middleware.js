@@ -2,19 +2,17 @@ import jwt from "jsonwebtoken";
 import pool from "../config/db.js";
 
 export const checkJWT = (req, res, next) => {
-    const authHeader = req.headers.authorization;
+    const token = req.cookies.auth_token;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!token) {
         return res.status(401).json({ message: "Unauthorized" });
     }
-
-    const token = authHeader.split(" ")[1];
 
     try {
         const payload = jwt.verify(token, process.env.JWT_SECRET);
         req.userId = payload.sub;
         next();
-    } catch {
+    } catch (err) {
         return res.status(401).json({ message: "Unauthorized" });
     }
 };

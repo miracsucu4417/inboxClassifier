@@ -37,10 +37,15 @@ export const googleCallbackController = async (req, res) => {
 
         const jwtToken = generateJWT(user.id);
 
-        res.json({
-            message: "OAuth successful",
-            jwtToken,
+        res.cookie("auth_token", jwtToken, {
+            httpOnly: true,
+            secure: process.env.JWT_COOKIE_HTTPS_ONLY,
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            path: "/",
         });
+
+        res.redirect("http://localhost:4000");
     } catch (error) {
         console.error(error);
         res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
