@@ -1,5 +1,5 @@
 import oauth2Client from "../config/google.js";
-import { getGoogleUserInfo, getUserByEmail, createUser, generateJWT } from "../services/auth.service.js";
+import { getGoogleUserInfo, getUserByEmail, createUser, generateJWT, updateOAuthRefreshToken } from "../services/auth.service.js";
 
 export const googleController = (req, res) => {
     const authUrl = oauth2Client.generateAuthUrl({
@@ -33,6 +33,10 @@ export const googleCallbackController = async (req, res) => {
             }
 
             user = await createUser(userInfo, "google", refreshToken);
+        } else {
+            if (refreshToken) {
+                await updateOAuthRefreshToken(user.id, "google", refreshToken);
+            }
         }
 
         const jwtToken = generateJWT(user.id);

@@ -11,6 +11,11 @@ authRouter.get("/google/callback", googleCallbackController);
 authRouter.get("/me", checkJWT, getUserInfo, (req, res) => {
     const user = req.user;
 
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+    res.set("Surrogate-Control", "no-store");
+
     res.status(200).json({ user });
 });
 

@@ -96,6 +96,19 @@ export const createUser = async (userInfo, provider, refreshToken) => {
     }
 };
 
+export const updateOAuthRefreshToken = async (userId, provider, refreshToken) => {
+    const encryptedToken = encrypt(refreshToken);
+
+    await pool.query(
+        `
+    UPDATE oauth_tokens
+    SET encrypted_token = $1
+    WHERE user_id = $2 AND provider = $3
+  `,
+        [encryptedToken, userId, provider],
+    );
+};
+
 export const generateJWT = (userId) => {
     return jwt.sign({ sub: userId }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 };

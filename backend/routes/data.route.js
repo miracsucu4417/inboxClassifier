@@ -8,6 +8,7 @@ import {
 } from "../controllers/data.controller.js";
 import { getMailCategories, getEventCategories } from "../services/data/stats/index.js";
 import { statsHandler } from "../controllers/data.controller.js";
+import { dataRefreshMailController, dataRefreshEventController } from "../controllers/data.controller.js";
 
 const dataRouter = express.Router();
 
@@ -22,5 +23,9 @@ dataRouter.post("/classify/event", checkJWT, getUserInfo, dataClassifyEventContr
 dataRouter.get("/stats/mail", checkJWT, getUserInfo, statsHandler(getMailCategories));
 
 dataRouter.get("/stats/event", checkJWT, getUserInfo, statsHandler(getEventCategories));
+
+dataRouter.post("/refresh/mail", checkJWT, getUserInfo, dataRefreshMailController);
+
+dataRouter.post("/refresh/event", checkJWT, getUserInfo, dataRefreshEventController);
 
 export default dataRouter;
