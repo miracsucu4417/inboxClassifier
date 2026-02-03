@@ -44,7 +44,7 @@ export const googleCallbackController = async (req, res) => {
         res.cookie("auth_token", jwtToken, {
             httpOnly: true,
             secure: process.env.JWT_COOKIE_HTTPS_ONLY,
-            sameSite: "lax",
+            sameSite: process.env.JWT_COOKIE_SAME_SITE,
             maxAge: 7 * 24 * 60 * 60 * 1000,
             path: "/",
         });

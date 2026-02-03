@@ -23,7 +23,7 @@ authRouter.post("/logout", (req, res) => {
     res.clearCookie("auth_token", {
         httpOnly: true,
         secure: process.env.JWT_COOKIE_HTTPS_ONLY,
-        sameSite: "lax",
+        sameSite: process.env.JWT_COOKIE_SAME_SITE,
         path: "/",
     });
 
