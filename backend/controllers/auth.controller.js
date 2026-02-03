@@ -53,7 +53,7 @@ export const googleCallbackController = async (req, res) => {
     } catch (error) {
         console.error(error);
 
-        if (error == "No code provided") {
+        if (error || error.message == "No code provided") {
             res.redirect(process.env.FRONTEND_URL);
         } else {
             res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
