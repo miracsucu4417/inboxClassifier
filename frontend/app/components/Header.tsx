@@ -62,7 +62,6 @@ export default function Header({
                                 onClick={() => {
                                     setMenuOpen(false);
                                     setConfirmOpen(true);
-                                    handleDeleteAccount();
                                 }}
                             >
                                 Delete account
@@ -100,7 +99,10 @@ export default function Header({
                             </button>
 
                             <button
-                                onClick={() => setConfirmOpen(false)}
+                                onClick={() => {
+                                    setConfirmOpen(false);
+                                    handleDeleteAccount();
+                                }}
                                 className="px-4 py-2 text-sm rounded-md bg-red-500 text-white hover:bg-red-600"
                             >
                                 Delete account
