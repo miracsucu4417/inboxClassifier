@@ -8,8 +8,4 @@ indexRouter.use("/auth", authRouter);
 
 indexRouter.use("/data", dataRouter);
 
-indexRouter.get("/ping", (req, res) => {
-    res.json({ message: "Backend çalışıyor" });
-});
-
 export default indexRouter;

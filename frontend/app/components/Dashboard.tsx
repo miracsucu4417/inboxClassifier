@@ -1,7 +1,7 @@
 import Header from "./Header";
-import type { User } from "../types/user";
 import { useEffect, useState, useRef } from "react";
 import CategoryCard from "./CategoryCard";
+import type { User } from "../types/user";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -16,6 +16,8 @@ type CategoryUI = RawCategory & {
 };
 
 type Tab = "gmail" | "calendar";
+
+type LoadState = { status: "loading" } | { status: "success"; data: any[] } | { status: "error"; reason: "permission" | "generic" };
 
 const categoryList = [
     "work",
@@ -78,66 +80,106 @@ const prepareCategoriesForUI = (categories: RawCategory[]): CategoryUI[] => {
         }));
 };
 
-export default function Dashboard({ user, handleLogout }: { user: User; handleLogout: () => void }) {
+export default function Dashboard({ user, handleLogout }: { user: any; handleLogout: () => void }) {
     const [activeTab, setActiveTab] = useState<Tab>("gmail");
 
-    const [gmailCategories, setGmailCategories] = useState<any[] | null>(null);
-    const [calendarCategories, setCalendarCategories] = useState<any[] | null>(null);
+    const [gmailState, setGmailState] = useState<LoadState>({
+        status: "loading",
+    });
 
+    const [calendarState, setCalendarState] = useState<LoadState>({
+        status: "loading",
+    });
+
+    /* -------------------- GMAIL -------------------- */
     useEffect(() => {
         const loadGmail = async () => {
             try {
-                // ⏳ loading
-                setGmailCategories(null);
+                setGmailState({ status: "loading" });
 
                 const res = await fetch(`${API_URL}/api/data/refresh/mail`, {
                     method: "POST",
-                    credentials: "include", // 🔑 COOKIE
+                    credentials: "include",
                 });
 
+                if (res.status === 403) {
+                    setGmailState({
+                        status: "error",
+                        reason: "permission",
+                    });
+                    return;
+                }
+
                 if (!res.ok) {
-                    throw new Error("Failed to refresh mail");
+                    setGmailState({
+                        status: "error",
+                        reason: "generic",
+                    });
+                    return;
                 }
 
                 const data = await res.json();
 
-                setGmailCategories(prepareCategoriesForUI(data.categories));
-            } catch (error) {
-                console.error(error);
-                setGmailCategories([]); // empty / error state
+                setGmailState({
+                    status: "success",
+                    data: prepareCategoriesForUI(data.categories),
+                });
+            } catch (err) {
+                console.error(err);
+                setGmailState({
+                    status: "error",
+                    reason: "generic",
+                });
             }
         };
 
         loadGmail();
     }, []);
 
+    /* -------------------- CALENDAR -------------------- */
     useEffect(() => {
         const loadCalendar = async () => {
             try {
-                setCalendarCategories(null);
+                setCalendarState({ status: "loading" });
 
                 const res = await fetch(`${API_URL}/api/data/refresh/event`, {
                     method: "POST",
-                    credentials: "include", // 🔑 COOKIE
+                    credentials: "include",
                 });
 
+                if (res.status === 403) {
+                    setCalendarState({
+                        status: "error",
+                        reason: "permission",
+                    });
+                    return;
+                }
+
                 if (!res.ok) {
-                    throw new Error("Failed to refresh event");
+                    setCalendarState({
+                        status: "error",
+                        reason: "generic",
+                    });
+                    return;
                 }
 
                 const data = await res.json();
 
-                setCalendarCategories(prepareCategoriesForUI(data.categories));
-            } catch (error) {
-                console.error(error);
-                setCalendarCategories([]);
+                setCalendarState({
+                    status: "success",
+                    data: prepareCategoriesForUI(data.categories),
+                });
+            } catch (err) {
+                console.error(err);
+                setCalendarState({
+                    status: "error",
+                    reason: "generic",
+                });
             }
         };
 
         loadCalendar();
     }, []);
-
-    const activeData = activeTab === "gmail" ? gmailCategories : calendarCategories;
 
     return (
         <main className="min-h-screen bg-[#EFEFF3] flex items-center justify-center md:py-16 font-sans">
@@ -148,13 +190,14 @@ export default function Dashboard({ user, handleLogout }: { user: User; handleLo
                 {/* TABS */}
                 <Tabs activeTab={activeTab} onChange={setActiveTab} />
 
-                {/* CARDS */}
-                <CategorySection categories={gmailCategories} hidden={activeTab !== "gmail"} type="gmail" />
+                {/* GMAIL */}
+                <CategorySection state={gmailState} hidden={activeTab !== "gmail"} type="gmail" onReauth={handleLogout} />
 
-                <CategorySection categories={calendarCategories} hidden={activeTab !== "calendar"} type="calendar" />
+                {/* CALENDAR */}
+                <CategorySection state={calendarState} hidden={activeTab !== "calendar"} type="calendar" onReauth={handleLogout} />
 
                 {/* FOOTER */}
-                <footer className="border-t py-4 text-center text-sm text-color-[#808080]">
+                <footer className="border-t py-4 text-center text-sm text-gray-500">
                     <a href="https://github.com/miracsucu4417/inboxClassifier" target="_blank" className="mr-4 hover:underline">
                         Github
                     </a>
@@ -253,44 +296,75 @@ const Tabs = ({ activeTab, onChange }: TabsProps) => {
 type SectionType = "gmail" | "calendar";
 
 const CategorySection = ({
-    categories,
+    state,
     hidden,
     type,
+    onReauth,
 }: {
-    categories: CategoryUI[] | null;
+    state: LoadState;
     hidden: boolean;
     type: "gmail" | "calendar";
+    onReauth: () => void;
 }) => {
+    if (hidden) return null;
+
+    /* -------------------- LOADING -------------------- */
+    if (state.status === "loading") {
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                    <CategorySkeleton key={i} />
+                ))}
+            </div>
+        );
+    }
+
+    /* -------------------- PERMISSION ERROR -------------------- */
+    if (state.status === "error" && state.reason === "permission") {
+        return (
+            <div className="flex flex-col items-center justify-center p-12 text-center">
+                <div className="text-4xl mb-3">🔐</div>
+                <h3 className="text-lg font-semibold text-gray-700">Google permission required</h3>
+                <p className="text-sm text-gray-500 mt-1 max-w-md">
+                    Please log out and sign in again, making sure to allow Gmail and Calendar permissions.
+                </p>
+                <button onClick={onReauth} className="mt-4 px-4 py-2 rounded-md bg-black text-white text-sm hover:opacity-90">
+                    Log out & re-login
+                </button>
+            </div>
+        );
+    }
+
+    /* -------------------- GENERIC ERROR -------------------- */
+    if (state.status === "error") {
+        return (
+            <div className="flex flex-col items-center justify-center p-12 text-center">
+                <div className="text-4xl mb-3">⚠️</div>
+                <h3 className="text-lg font-semibold text-gray-700">Something went wrong</h3>
+                <p className="text-sm text-gray-500 mt-1">Please try again later.</p>
+            </div>
+        );
+    }
+
+    /* -------------------- EMPTY -------------------- */
+    if (state.data.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center p-12 text-center">
+                <div className="text-gray-400 mb-3 text-4xl">{type === "gmail" ? "📭" : "📅"}</div>
+                <h3 className="text-lg font-semibold text-gray-700">{type === "gmail" ? "No emails found" : "No events found"}</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                    {type === "gmail" ? "There are no emails in this category yet." : "There are no calendar events available."}
+                </p>
+            </div>
+        );
+    }
+
+    /* -------------------- DATA -------------------- */
     return (
-        <section className={`${hidden ? "hidden" : ""}`}>
-            {/* LOADING */}
-            {categories === null && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                        <CategorySkeleton key={i} />
-                    ))}
-                </div>
-            )}
-
-            {/* EMPTY */}
-            {categories?.length === 0 && (
-                <div className="flex flex-col items-center justify-center p-12 text-center">
-                    <div className="text-gray-400 mb-3 text-4xl">{type === "gmail" ? "📭" : "📅"}</div>
-                    <h3 className="text-lg font-semibold text-gray-700">{type === "gmail" ? "No emails found" : "No events found"}</h3>
-                    <p className="text-sm text-gray-500 mt-1">
-                        {type === "gmail" ? "There are no emails in this category yet." : "There are no calendar events available."}
-                    </p>
-                </div>
-            )}
-
-            {/* DATA */}
-            {categories && categories.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
-                    {categories.map((item) => (
-                        <CategoryCard key={item.category} item={item} isVisible={!hidden} type={type} />
-                    ))}
-                </div>
-            )}
-        </section>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+            {state.data.map((item) => (
+                <CategoryCard key={item.category} item={item} isVisible type={type} />
+            ))}
+        </div>
     );
-};
+}

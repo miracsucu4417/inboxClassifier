@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import type { User } from "../types/user";
+
 type RawCategory = {
     category: string;
     count: number;
@@ -68,7 +70,7 @@ export default function CategoryCard({ item, isVisible, type }: CategoryCardProp
 
         <div className="flex-1">
           {/* TITLE */}
-          <div className="text-md font-semibold mb-2 text-gray-800">
+          <div className="text-md font-semibold mb-2 text-gray-800 capitalize">
             {item.category}
           </div>
 

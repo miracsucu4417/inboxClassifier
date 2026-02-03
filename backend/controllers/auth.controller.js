@@ -52,6 +52,11 @@ export const googleCallbackController = async (req, res) => {
         res.redirect("http://localhost:4000");
     } catch (error) {
         console.error(error);
-        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
+
+        if (error == "No code provided") {
+            res.redirect("http://localhost:4000");
+        } else {
+            res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
+        }
     }
 };

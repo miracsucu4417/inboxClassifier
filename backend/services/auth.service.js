@@ -2,7 +2,6 @@ import oauth2Client from "../config/google.js";
 import jwt from "jsonwebtoken";
 import pool from "../config/db.js";
 import { encrypt, decrypt } from "../utils/crypto.js";
-import { google } from "googleapis";
 
 export const getGoogleUserInfo = async (code) => {
     try {

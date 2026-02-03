@@ -32,7 +32,7 @@ export default function Header({ user, handleLogout }: { user: User; handleLogou
                 {/* PROFILE + DROPDOWN */}
                 <div ref={menuRef} className="relative">
                     <button onClick={() => setMenuOpen((p) => !p)} className="flex items-center gap-2">
-                        <Image src="/img/profile.png" alt="User" width={32} height={32} className="rounded-full" />
+                        <Image src={user.picture_url} alt="User" width={32} height={32} className="rounded-full" />
                         <span className="text-sm font-medium text-gray-700">{user.full_name}</span>
                         <Image src="/icons/triangle.svg" alt="▼" width={10} height={10} />
                     </button>
