@@ -80,7 +80,7 @@ const prepareCategoriesForUI = (categories: RawCategory[]): CategoryUI[] => {
         }));
 };
 
-export default function Dashboard({ user, handleLogout }: { user: any; handleLogout: () => void }) {
+export default function Dashboard({ user, handleLogout, handleDeleteAccount }: { user: any; handleLogout: () => void; handleDeleteAccount: () => void }) {
     const [activeTab, setActiveTab] = useState<Tab>("gmail");
 
     const [gmailState, setGmailState] = useState<LoadState>({
@@ -185,7 +185,7 @@ export default function Dashboard({ user, handleLogout }: { user: any; handleLog
         <main className="min-h-screen bg-[#EFEFF3] flex items-center justify-center md:py-16 font-sans">
             <div className="w-[720px] bg-white rounded-xl border shadow-sm">
                 {/* HEADER */}
-                <Header user={user} handleLogout={handleLogout} />
+                <Header user={user} handleLogout={handleLogout} handleDeleteAccount={handleDeleteAccount} />
 
                 {/* TABS */}
                 <Tabs activeTab={activeTab} onChange={setActiveTab} />

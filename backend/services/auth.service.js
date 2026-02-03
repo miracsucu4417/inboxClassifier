@@ -95,6 +95,16 @@ export const createUser = async (userInfo, provider, refreshToken) => {
     }
 };
 
+export const deleteUser = async (userId) => {
+    await pool.query(
+        `
+    DELETE FROM users
+    WHERE id = $1
+  `,
+        [userId],
+    );
+};
+
 export const updateOAuthRefreshToken = async (userId, provider, refreshToken) => {
     const encryptedToken = encrypt(refreshToken);
 

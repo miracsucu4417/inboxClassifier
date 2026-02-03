@@ -4,7 +4,15 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import type { User } from "../types/user";
 
-export default function Header({ user, handleLogout }: { user: User; handleLogout: () => void }) {
+export default function Header({
+    user,
+    handleLogout,
+    handleDeleteAccount,
+}: {
+    user: User;
+    handleLogout: () => void;
+    handleDeleteAccount: () => void;
+}) {
     const [menuOpen, setMenuOpen] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -54,6 +62,7 @@ export default function Header({ user, handleLogout }: { user: User; handleLogou
                                 onClick={() => {
                                     setMenuOpen(false);
                                     setConfirmOpen(true);
+                                    handleDeleteAccount();
                                 }}
                             >
                                 Delete account

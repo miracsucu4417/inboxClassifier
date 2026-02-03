@@ -24,6 +24,29 @@ export default function Page() {
         setUser(null);
     };
 
+    const handleDeleteAccount = async () => {
+        try {
+            const res = await fetch(`${API_URL}/api/auth/delete-account`, {
+                method: "DELETE",
+                credentials: "include",
+                cache: "no-store",
+                headers: {
+                    Pragma: "no-cache",
+                    "Cache-Control": "no-cache",
+                },
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to delete account");
+            }
+
+            setUser(null);
+        } catch (err) {
+            console.error(err);
+            alert("Failed to delete your account. Please try again.");
+        }
+    };
+
     const checkUser = async () => {
         try {
             const res = await fetch(`${API_URL}/api/auth/me`, {
@@ -49,7 +72,5 @@ export default function Page() {
         return <Login />;
     }
 
-    return <Dashboard user={user} handleLogout={handleLogout} />;
+    return <Dashboard user={user} handleLogout={handleLogout} handleDeleteAccount={handleDeleteAccount} />;
 }
-
-
